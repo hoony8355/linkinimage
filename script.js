@@ -1,3 +1,5 @@
+// JavaScript logic for Image Map Generator
+
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
@@ -19,9 +21,7 @@ document.getElementById("image-upload").addEventListener("change", (e) => {
 
 function loadImageFromURL() {
   const url = document.getElementById("image-url").value;
-  if (url) {
-    preview.src = url;
-  }
+  if (url) preview.src = url;
 }
 
 preview.onload = () => {
@@ -42,8 +42,7 @@ function addHotspot() {
   div.style.top = "10%";
   div.style.width = "20%";
   div.style.height = "5%";
-  div.style.position = "absolute";
-  div.style.border = `2px dashed ${color}`;
+  div.style.borderColor = color;
   div.style.backgroundColor = `rgba(${getRGB(color)}, 0.2)`;
 
   div.setAttribute("data-href", href);
@@ -53,10 +52,11 @@ function addHotspot() {
   label.innerText = `${title} (${href})`;
   div.appendChild(label);
 
-  const controlBox = document.createElement("div");
-  controlBox.className = "hotspot-controls";
-  controlBox.style.left = div.style.left;
-  controlBox.style.top = div.style.top;
+  const controls = document.createElement("div");
+  controls.className = "controls";
+  controls.style.left = "0";
+  controls.style.top = "0";
+  controls.style.position = "absolute";
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -86,19 +86,19 @@ function addHotspot() {
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
-  deleteBtn.onclick = () => {
-    container.removeChild(div);
-    container.removeChild(controlBox);
-  };
+  deleteBtn.onclick = () => container.removeChild(div);
 
-  controlBox.appendChild(editBtn);
-  controlBox.appendChild(resizeBtn);
-  controlBox.appendChild(deleteBtn);
-
-  container.appendChild(controlBox);
+  controls.appendChild(editBtn);
+  controls.appendChild(resizeBtn);
+  controls.appendChild(deleteBtn);
+  div.appendChild(controls);
   container.appendChild(div);
+  makeDraggable(div);
 
-  makeDraggable(div, controlBox);
+  // 자동 스크롤 이동
+  setTimeout(() => {
+    div.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
 }
 
 function getRGB(colorName) {
@@ -114,7 +114,7 @@ function getRGB(colorName) {
   return colors[colorName] || "0,0,0";
 }
 
-function makeDraggable(el, controlBox) {
+function makeDraggable(el) {
   let isDragging = false, startX, startY;
   el.addEventListener("mousedown", function (e) {
     if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
@@ -130,8 +130,6 @@ function makeDraggable(el, controlBox) {
       const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
       el.style.left = `${x}%`;
       el.style.top = `${y}%`;
-      controlBox.style.left = el.style.left;
-      controlBox.style.top = el.style.top;
     }
     if (resizingElement && e.buttons === 1) {
       const rect = container.getBoundingClientRect();
