@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS-based Image Map Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .uploader {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    #image-container {
+      position: relative;
+      max-width: 1080px;
+      margin: auto;
+    }
+    #preview {
+      width: 100%;
+      display: block;
+      border: 1px solid #ccc;
+    }
+    .hotspot {
+      position: absolute;
+      border: 2px dashed red;
+      background: rgba(255, 0, 0, 0.2);
+      cursor: move;
+    }
+    #code-output {
+      width: 100%;
+      height: 200px;
+      margin-top: 2rem;
+      font-family: monospace;
+      white-space: pre;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS-based Image Map Generator</h1>
+
+  <div class="uploader">
+    <input type="file" id="image-upload" accept="image/*" />
+  </div>
+
+  <div id="image-container">
+    <img id="preview" src="" alt="Preview" />
+  </div>
+
+  <div style="text-align: center">
+    <button onclick="addHotspot()">+ 버튼 추가</button>
+    <button onclick="generateCode()">코드 생성</button>
+  </div>
+
+  <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다"></textarea>
+
+  <script>
+    const preview = document.getElementById("preview");
+    const container = document.getElementById("image-container");
+    let imageWidth = 1080, imageHeight = 6503; // Default, will update on image load
+
+    document.getElementById("image-upload").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        preview.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    preview.onload = () => {
+      imageWidth = preview.naturalWidth;
+      imageHeight = preview.naturalHeight;
+    };
+
+    function addHotspot() {
+      const div = document.createElement("div");
+      div.className = "hotspot";
+      div.contentEditable = false;
+      div.style.left = "10%";
+      div.style.top = "10%";
+      div.style.width = "20%";
+      div.style.height = "5%";
+
+      div.setAttribute("data-href", prompt("링크 주소를 입력하세요:"));
+      div.setAttribute("data-title", prompt("링크 타이틀을 입력하세요:"));
+
+      container.appendChild(div);
+      makeDraggable(div);
+    }
+
+    function makeDraggable(el) {
+      let isDragging = false, startX, startY;
+      el.addEventListener("mousedown", function (e) {
+        isDragging = true;
+        startX = e.offsetX;
+        startY = e.offsetY;
+      });
+      document.addEventListener("mousemove", function (e) {
+        if (isDragging) {
+          const rect = container.getBoundingClientRect();
+          const x = ((e.clientX - rect.left - startX) / rect.width) * 100;
+          const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
+          el.style.left = `${x}%`;
+          el.style.top = `${y}%`;
+        }
+      });
+      document.addEventListener("mouseup", () => (isDragging = false));
+    }
+
+    function generateCode() {
+      let output = `<div style="position: relative; max-width: ${imageWidth}px; margin: auto;">\n`;
+      output += `  <img src="IMAGE_URL_HERE" style="width: 100%; display: block;" alt="포스터" />\n\n`;
+
+      document.querySelectorAll(".hotspot").forEach((el) => {
+        const href = el.getAttribute("data-href") || "#";
+        const title = el.getAttribute("data-title") || "";
+        output += `  <a href="${href}" target="_blank" title="${title}" style="position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;"></a>\n`;
+      });
+
+      output += `</div>`;
+      document.getElementById("code-output").value = output;
+    }
+  </script>
+</body>
+</html>
