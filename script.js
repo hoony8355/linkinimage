@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator (크기조절 버튼 상태 복원 수정 포함)
+// JavaScript logic for Image Map Generator with 축소모드 + 크기조절 유지 모드 추가
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -8,6 +8,8 @@ let imageWidth = 1080, imageHeight = 6503;
 let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
+let isResizeModePersistent = false;
+let isZoomOutMode = false;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
@@ -29,6 +31,17 @@ preview.onload = () => {
   imageWidth = preview.naturalWidth;
   imageHeight = preview.naturalHeight;
 };
+
+function toggleZoomOut() {
+  isZoomOutMode = !isZoomOutMode;
+  if (isZoomOutMode) {
+    preview.style.maxHeight = "80vh";
+    preview.style.objectFit = "contain";
+  } else {
+    preview.style.maxHeight = "unset";
+    preview.style.objectFit = "unset";
+  }
+}
 
 function addHotspot() {
   const href = prompt("링크 주소를 입력하세요:") || "#";
@@ -72,12 +85,12 @@ function addHotspot() {
   const resizeBtn = document.createElement("button");
   resizeBtn.innerText = "📐";
   resizeBtn.onclick = () => {
-    const isActive = resizingElement === div;
-    if (isActive) {
+    if (resizingElement === div && isResizeModePersistent) {
       div.classList.remove("resizing");
+      resizeBtn.style.background = "";
       resizingElement = null;
       currentResizeButton = null;
-      resizeBtn.style.background = "";
+      isResizeModePersistent = false;
     } else {
       if (resizingElement) {
         resizingElement.classList.remove("resizing");
@@ -85,10 +98,15 @@ function addHotspot() {
       }
       resizingElement = div;
       currentResizeButton = resizeBtn;
+      isResizeModePersistent = true;
       div.classList.add("resizing");
       resizeBtn.style.background = "#d0e0ff";
     }
   };
+
+  const zoomBtn = document.createElement("button");
+  zoomBtn.innerText = "🔍";
+  zoomBtn.onclick = toggleZoomOut;
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
@@ -96,6 +114,7 @@ function addHotspot() {
 
   controls.appendChild(editBtn);
   controls.appendChild(resizeBtn);
+  controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
   div.appendChild(controls);
   container.appendChild(div);
@@ -148,7 +167,7 @@ function makeDraggable(el) {
   });
   document.addEventListener("mouseup", () => {
     isDragging = false;
-    if (resizingElement) {
+    if (!isResizeModePersistent && resizingElement) {
       resizingElement.classList.remove("resizing");
       if (currentResizeButton) currentResizeButton.style.background = "";
       resizingElement = null;
