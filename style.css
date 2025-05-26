@@ -1,11 +1,16 @@
+/* 스타일 업데이트: 깔끔한 UI/UX + 모바일 반응형 지원 */
+
 body {
-  font-family: sans-serif;
-  padding: 2rem;
-  background: #f9f9f9;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 1rem;
+  background: #f4f4f4;
+  margin: 0;
 }
 
 h1 {
   text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .uploader {
@@ -15,14 +20,15 @@ h1 {
 
 #image-container {
   position: relative;
-  max-width: 1080px;
-  margin: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  background: white;
 }
 
 #preview {
   width: 100%;
   display: block;
-  border: 1px solid #ccc;
 }
 
 .hotspot {
@@ -32,6 +38,7 @@ h1 {
   cursor: move;
   resize: both;
   overflow: hidden;
+  z-index: 1;
 }
 
 .hotspot span {
@@ -58,22 +65,79 @@ h1 {
 #code-output {
   width: 100%;
   height: 200px;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   font-family: monospace;
   white-space: pre;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  background: #fff;
+  box-sizing: border-box;
 }
 
 button {
   padding: 0.5rem 1rem;
-  margin-top: 1rem;
+  margin: 0.5rem 0.25rem;
+  font-size: 0.9rem;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 #image-url {
-  width: 60%;
-  padding: 0.3rem;
+  width: 90%;
+  max-width: 500px;
+  padding: 0.4rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
 }
 
 .resizing {
   outline: 2px dashed #555;
   cursor: nwse-resize;
+}
+
+#code-options {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+label input[type="radio"] {
+  margin-right: 0.25rem;
+}
+
+@media screen and (max-width: 600px) {
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  #image-url {
+    width: 95%;
+  }
+
+  .hotspot span {
+    font-size: 9px;
+  }
+
+  #code-output {
+    font-size: 0.85rem;
+    height: 160px;
+  }
 }
