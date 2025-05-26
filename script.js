@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator with 외부 버튼 UI + 녹색 활성화 표시 적용
+// JavaScript logic for Image Map Generator with 버튼을 핫스팟(범위박스) 밖에 배치
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -67,10 +67,11 @@ function addHotspot() {
   const controls = document.createElement("div");
   controls.className = "controls";
   controls.style.position = "absolute";
-  controls.style.top = "-32px";
-  controls.style.left = "0";
+  controls.style.left = "calc(100% + 4px)";
+  controls.style.top = "0";
   controls.style.zIndex = "10";
   controls.style.display = "flex";
+  controls.style.flexDirection = "column";
   controls.style.gap = "4px";
 
   const editBtn = document.createElement("button");
@@ -111,15 +112,18 @@ function addHotspot() {
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
-  deleteBtn.onclick = () => container.removeChild(div);
+  deleteBtn.onclick = () => {
+    div.remove();
+    controls.remove();
+  };
 
   controls.appendChild(editBtn);
   controls.appendChild(resizeBtn);
   controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
-  container.appendChild(controls);
   container.appendChild(div);
-  makeDraggable(div);
+  container.appendChild(controls);
+  makeDraggable(div, controls);
 
   setTimeout(() => {
     div.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -139,7 +143,7 @@ function getRGB(colorName) {
   return colors[colorName] || "0,0,0";
 }
 
-function makeDraggable(el) {
+function makeDraggable(el, controls) {
   let isDragging = false, startX, startY;
   el.addEventListener("mousedown", function (e) {
     if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
@@ -155,6 +159,8 @@ function makeDraggable(el) {
       const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
       el.style.left = `${x}%`;
       el.style.top = `${y}%`;
+      controls.style.left = `calc(${el.style.left} + ${el.style.width} + 4px)`;
+      controls.style.top = el.style.top;
     }
     if (resizingElement && e.buttons === 1) {
       const rect = container.getBoundingClientRect();
