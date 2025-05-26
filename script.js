@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator with 축소모드 + 크기조절 유지 모드 추가
+// JavaScript logic for Image Map Generator with 외부 버튼 UI + 녹색 활성화 표시 적용
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -10,6 +10,7 @@ let resizingElement = null;
 let currentResizeButton = null;
 let isResizeModePersistent = false;
 let isZoomOutMode = false;
+let currentZoomButton = null;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
@@ -27,19 +28,16 @@ function loadImageFromURL() {
   if (url) preview.src = url;
 }
 
-preview.onload = () => {
-  imageWidth = preview.naturalWidth;
-  imageHeight = preview.naturalHeight;
-};
-
-function toggleZoomOut() {
+function toggleZoomOut(zoomBtn) {
   isZoomOutMode = !isZoomOutMode;
   if (isZoomOutMode) {
     preview.style.maxHeight = "80vh";
     preview.style.objectFit = "contain";
+    zoomBtn.style.background = "#c4f4c4";
   } else {
     preview.style.maxHeight = "unset";
     preview.style.objectFit = "unset";
+    zoomBtn.style.background = "";
   }
 }
 
@@ -68,9 +66,12 @@ function addHotspot() {
 
   const controls = document.createElement("div");
   controls.className = "controls";
-  controls.style.left = "0";
-  controls.style.top = "0";
   controls.style.position = "absolute";
+  controls.style.top = "-32px";
+  controls.style.left = "0";
+  controls.style.zIndex = "10";
+  controls.style.display = "flex";
+  controls.style.gap = "4px";
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -100,13 +101,13 @@ function addHotspot() {
       currentResizeButton = resizeBtn;
       isResizeModePersistent = true;
       div.classList.add("resizing");
-      resizeBtn.style.background = "#d0e0ff";
+      resizeBtn.style.background = "#c4f4c4";
     }
   };
 
   const zoomBtn = document.createElement("button");
   zoomBtn.innerText = "🔍";
-  zoomBtn.onclick = toggleZoomOut;
+  zoomBtn.onclick = () => toggleZoomOut(zoomBtn);
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
@@ -116,7 +117,7 @@ function addHotspot() {
   controls.appendChild(resizeBtn);
   controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
-  div.appendChild(controls);
+  container.appendChild(controls);
   container.appendChild(div);
   makeDraggable(div);
 
