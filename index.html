@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSS-based Image Map Generator 1.0 </title>
+  <title>CSS-based Image Map Generator 1.1 </title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -98,11 +98,23 @@
         label.innerText = `${newTitle} (${newHref})`;
       };
 
+      const resizeBtn = document.createElement("button");
+      resizeBtn.innerText = "📐";
+      resizeBtn.onclick = () => {
+        const newWidth = prompt("새 width (%):", div.style.width.replace("%", "")) || "";
+        const newHeight = prompt("새 height (%):", div.style.height.replace("%", "")) || "";
+        if (newWidth && newHeight) {
+          div.style.width = `${newWidth}%`;
+          div.style.height = `${newHeight}%`;
+        }
+      };
+
       const deleteBtn = document.createElement("button");
       deleteBtn.innerText = "❌";
       deleteBtn.onclick = () => container.removeChild(div);
 
       controlWrap.appendChild(editBtn);
+      controlWrap.appendChild(resizeBtn);
       controlWrap.appendChild(deleteBtn);
       div.appendChild(controlWrap);
 
