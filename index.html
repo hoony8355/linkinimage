@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSS-based Image Map Generator</title>
+  <title>CSS-based Image Map Generator 1.0 </title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -85,22 +85,26 @@
       label.innerText = `${title} (${href})`;
       div.appendChild(label);
 
-      const controls = document.createElement("div");
-      controls.className = "controls";
-      controls.innerText = "✏️/❌";
-      controls.onclick = () => {
-        const mode = prompt("'1'을 입력하면 편집, '2'를 입력하면 삭제:");
-        if (mode === "1") {
-          const newHref = prompt("새 링크 주소:", div.getAttribute("data-href")) || "#";
-          const newTitle = prompt("새 타이틀:", div.getAttribute("data-title")) || "";
-          div.setAttribute("data-href", newHref);
-          div.setAttribute("data-title", newTitle);
-          label.innerText = `${newTitle} (${newHref})`;
-        } else if (mode === "2") {
-          container.removeChild(div);
-        }
+      const controlWrap = document.createElement("div");
+      controlWrap.className = "controls";
+
+      const editBtn = document.createElement("button");
+      editBtn.innerText = "✏️";
+      editBtn.onclick = () => {
+        const newHref = prompt("새 링크 주소:", div.getAttribute("data-href")) || "#";
+        const newTitle = prompt("새 타이틀:", div.getAttribute("data-title")) || "";
+        div.setAttribute("data-href", newHref);
+        div.setAttribute("data-title", newTitle);
+        label.innerText = `${newTitle} (${newHref})`;
       };
-      div.appendChild(controls);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.innerText = "❌";
+      deleteBtn.onclick = () => container.removeChild(div);
+
+      controlWrap.appendChild(editBtn);
+      controlWrap.appendChild(deleteBtn);
+      div.appendChild(controlWrap);
 
       container.appendChild(div);
       makeDraggable(div);
@@ -122,7 +126,7 @@
     function makeDraggable(el) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
-        if (e.target.classList.contains("controls") || e.target.tagName === 'SPAN') return;
+        if (e.target.classList.contains("controls") || e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
         isDragging = true;
         startX = e.offsetX;
         startY = e.offsetY;
