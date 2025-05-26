@@ -1,9 +1,11 @@
-// JavaScript logic for Image Map Generator – 확대/축소 시 핫스팟 비율 유지 및 슬라이더 확대 추가
+// JavaScript logic for Image Map Generator – 리팩토링 및 이미지 URL 불러오기 수정
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
+const zoomSlider = document.getElementById("zoom-slider");
+
 let imageWidth = 1080, imageHeight = 6503;
 let hotspotIndex = 0;
 let resizingElement = null;
@@ -13,7 +15,31 @@ let zoomScale = 1.0;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
-const zoomSlider = document.getElementById("zoom-slider");
+// 이미지 업로드
+const imageUpload = document.getElementById("image-upload");
+if (imageUpload) {
+  imageUpload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        preview.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// 이미지 URL 로드
+function loadImageFromURL() {
+  const url = document.getElementById("image-url").value.trim();
+  if (url) {
+    preview.crossOrigin = "anonymous"; // 크로스도메인 오류 방지 시도
+    preview.src = url;
+  }
+}
+
+// 확대/축소 슬라이더
 if (zoomSlider) {
   zoomSlider.addEventListener("input", () => {
     const scale = parseFloat(zoomSlider.value);
@@ -23,37 +49,8 @@ if (zoomSlider) {
 
 function setZoom(scale) {
   zoomScale = scale;
-  preview.style.transform = `scale(${scale})`;
-  preview.style.transformOrigin = "top left";
   container.style.transform = `scale(${scale})`;
   container.style.transformOrigin = "top left";
-
-  document.querySelectorAll(".hotspot").forEach((el) => {
-    const baseLeft = parseFloat(el.getAttribute("data-base-left")) || parseFloat(el.style.left);
-    const baseTop = parseFloat(el.getAttribute("data-base-top")) || parseFloat(el.style.top);
-    const baseWidth = parseFloat(el.getAttribute("data-base-width")) || parseFloat(el.style.width);
-    const baseHeight = parseFloat(el.getAttribute("data-base-height")) || parseFloat(el.style.height);
-
-    el.style.left = `${baseLeft}%`;
-    el.style.top = `${baseTop}%`;
-    el.style.width = `${baseWidth}%`;
-    el.style.height = `${baseHeight}%`;
-
-    el.setAttribute("data-base-left", baseLeft);
-    el.setAttribute("data-base-top", baseTop);
-    el.setAttribute("data-base-width", baseWidth);
-    el.setAttribute("data-base-height", baseHeight);
-  });
-}
-
-function toggleZoomOut(zoomBtn) {
-  if (zoomScale !== 1) {
-    setZoom(1);
-    zoomBtn.style.background = "";
-  } else {
-    setZoom(0.5); // default zoom out level
-    zoomBtn.style.background = "#c4f4c4";
-  }
 }
 
 function addHotspot() {
@@ -74,12 +71,16 @@ function addHotspot() {
 
   div.setAttribute("data-href", href);
   div.setAttribute("data-title", title);
+  div.setAttribute("data-base-left", "10");
+  div.setAttribute("data-base-top", "10");
+  div.setAttribute("data-base-width", "20");
+  div.setAttribute("data-base-height", "5");
 
   const label = document.createElement("span");
   label.innerText = `${title} (${href})`;
   div.appendChild(label);
 
-  container.appendChild(div); // append first so offsetTop is valid
+  container.appendChild(div);
 
   const controls = document.createElement("div");
   controls.className = "controls";
@@ -89,7 +90,6 @@ function addHotspot() {
   controls.style.zIndex = "10";
   controls.style.display = "flex";
   controls.style.gap = "4px";
-  controls.style.marginBottom = "4px";
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -145,6 +145,16 @@ function addHotspot() {
   setTimeout(() => {
     div.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 100);
+}
+
+function toggleZoomOut(zoomBtn) {
+  if (zoomScale !== 1) {
+    setZoom(1);
+    zoomBtn.style.background = "";
+  } else {
+    setZoom(0.5);
+    zoomBtn.style.background = "#c4f4c4";
+  }
 }
 
 function getRGB(colorName) {
