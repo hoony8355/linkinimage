@@ -1,0 +1,74 @@
+body {
+  font-family: sans-serif;
+  padding: 2rem;
+  background: #f9f9f9;
+}
+
+h1 {
+  text-align: center;
+}
+
+.uploader {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+#image-container {
+  position: relative;
+  max-width: 1080px;
+  margin: auto;
+}
+
+#preview {
+  width: 100%;
+  display: block;
+  border: 1px solid #ccc;
+}
+
+.hotspot {
+  position: absolute;
+  border: 2px dashed red;
+  background: rgba(255, 0, 0, 0.2);
+  cursor: move;
+  resize: both;
+  overflow: hidden;
+}
+
+.hotspot span {
+  display: block;
+  font-size: 10px;
+  color: #333;
+  background: #fff;
+  padding: 2px;
+  border-top: 1px solid #ccc;
+  white-space: nowrap;
+}
+
+.hotspot .controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 2px;
+  cursor: pointer;
+}
+
+#code-output {
+  width: 100%;
+  height: 200px;
+  margin-top: 2rem;
+  font-family: monospace;
+  white-space: pre;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+}
+
+#image-url {
+  width: 60%;
+  padding: 0.3rem;
+}
