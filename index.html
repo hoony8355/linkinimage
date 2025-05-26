@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CSS-based Image Map Generator</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .resizing {
+      outline: 2px dashed #555;
+    }
+  </style>
 </head>
 <body>
-  <h1>1 CSS-based Image Map Generator</h1>
+  <h1>CSS-based Image Map Generator</h1>
 
   <div class="uploader">
     <div>
@@ -38,6 +43,7 @@
     const container = document.getElementById("image-container");
     let imageWidth = 1080, imageHeight = 6503;
     let hotspotIndex = 0;
+    let resizingElement = null;
 
     const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
@@ -101,12 +107,11 @@
       const resizeBtn = document.createElement("button");
       resizeBtn.innerText = "📐";
       resizeBtn.onclick = () => {
-        const newWidth = prompt("새 width (%):", div.style.width.replace("%", "")) || "";
-        const newHeight = prompt("새 height (%):", div.style.height.replace("%", "")) || "";
-        if (newWidth && newHeight) {
-          div.style.width = `${newWidth}%`;
-          div.style.height = `${newHeight}%`;
+        if (resizingElement) {
+          resizingElement.classList.remove("resizing");
         }
+        resizingElement = div;
+        div.classList.add("resizing");
       };
 
       const deleteBtn = document.createElement("button");
@@ -139,6 +144,7 @@
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
         if (e.target.classList.contains("controls") || e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
+        if (resizingElement === el) return; // resizing mode skip dragging
         isDragging = true;
         startX = e.offsetX;
         startY = e.offsetY;
@@ -151,8 +157,23 @@
           el.style.left = `${x}%`;
           el.style.top = `${y}%`;
         }
+        if (resizingElement && e.buttons === 1 && e.target === resizingElement) {
+          const rect = container.getBoundingClientRect();
+          const right = ((e.clientX - rect.left) / rect.width) * 100;
+          const bottom = ((e.clientY - rect.top) / rect.height) * 100;
+          const left = parseFloat(resizingElement.style.left);
+          const top = parseFloat(resizingElement.style.top);
+          resizingElement.style.width = `${right - left}%`;
+          resizingElement.style.height = `${bottom - top}%`;
+        }
       });
-      document.addEventListener("mouseup", () => (isDragging = false));
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        if (resizingElement) {
+          resizingElement.classList.remove("resizing");
+          resizingElement = null;
+        }
+      });
     }
 
     function generateCode() {
