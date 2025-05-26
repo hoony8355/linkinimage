@@ -13,11 +13,22 @@
       outline: 2px dashed #555;
     }
     .hotspot-controls {
-      margin-top: 4px;
+      position: absolute;
+      top: -28px;
+      left: -4px;
       display: flex;
       gap: 4px;
-      justify-content: flex-start;
-      align-items: center;
+      background: rgba(255,255,255,0.8);
+      padding: 2px 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+      z-index: 10;
+    }
+    .hotspot-controls button {
+      padding: 0 4px;
+      font-size: 12px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -46,14 +57,11 @@
     <button onclick="generateCode()">코드 생성</button>
   </div>
 
-  <div id="hotspot-controls-area"></div>
-
   <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다" style="user-select: text;"></textarea>
 
   <script>
     const preview = document.getElementById("preview");
     const container = document.getElementById("image-container");
-    const controlArea = document.getElementById("hotspot-controls-area");
     let imageWidth = 1080, imageHeight = 6503;
     let hotspotIndex = 0;
     let resizingElement = null;
@@ -109,17 +117,11 @@
       label.style.display = "block";
       div.appendChild(label);
 
-      container.appendChild(div);
-      makeDraggable(div);
-      attachExternalControls(div);
-    }
-
-    function attachExternalControls(div) {
       const controlBox = document.createElement("div");
       controlBox.className = "hotspot-controls";
 
       const editBtn = document.createElement("button");
-      editBtn.innerText = "✏️ 수정";
+      editBtn.innerText = "✏️";
       editBtn.onclick = () => {
         const newHref = prompt("새 링크 주소:", div.getAttribute("data-href")) || "#";
         const newTitle = prompt("새 타이틀:", div.getAttribute("data-title")) || "";
@@ -129,7 +131,7 @@
       };
 
       const resizeBtn = document.createElement("button");
-      resizeBtn.innerText = "📐 크기 조정";
+      resizeBtn.innerText = "📐";
       resizeBtn.onclick = () => {
         if (resizingElement) resizingElement.classList.remove("resizing");
         resizingElement = div;
@@ -137,17 +139,18 @@
       };
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.innerText = "❌ 삭제";
+      deleteBtn.innerText = "❌";
       deleteBtn.onclick = () => {
         container.removeChild(div);
-        controlBox.remove();
       };
 
       controlBox.appendChild(editBtn);
       controlBox.appendChild(resizeBtn);
       controlBox.appendChild(deleteBtn);
 
-      controlArea.appendChild(controlBox);
+      div.appendChild(controlBox);
+      container.appendChild(div);
+      makeDraggable(div);
     }
 
     function getRGB(colorName) {
@@ -166,6 +169,7 @@
     function makeDraggable(el) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
         if (resizingElement === el) return;
         isDragging = true;
         startX = e.offsetX;
@@ -179,7 +183,7 @@
           el.style.left = `${x}%`;
           el.style.top = `${y}%`;
         }
-        if (resizingElement && e.buttons === 1 && e.target === resizingElement) {
+        if (resizingElement && e.buttons === 1) {
           const rect = container.getBoundingClientRect();
           const right = ((e.clientX - rect.left) / rect.width) * 100;
           const bottom = ((e.clientY - rect.top) / rect.height) * 100;
