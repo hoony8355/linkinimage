@@ -14,8 +14,7 @@
     }
     .hotspot-controls {
       position: absolute;
-      top: -28px;
-      left: -4px;
+      transform: translateY(-100%);
       display: flex;
       gap: 4px;
       background: rgba(255,255,255,0.8);
@@ -119,6 +118,8 @@
 
       const controlBox = document.createElement("div");
       controlBox.className = "hotspot-controls";
+      controlBox.style.left = div.style.left;
+      controlBox.style.top = div.style.top;
 
       const editBtn = document.createElement("button");
       editBtn.innerText = "✏️";
@@ -142,15 +143,16 @@
       deleteBtn.innerText = "❌";
       deleteBtn.onclick = () => {
         container.removeChild(div);
+        container.removeChild(controlBox);
       };
 
       controlBox.appendChild(editBtn);
       controlBox.appendChild(resizeBtn);
       controlBox.appendChild(deleteBtn);
-
-      div.appendChild(controlBox);
+      container.appendChild(controlBox);
       container.appendChild(div);
-      makeDraggable(div);
+
+      makeDraggable(div, controlBox);
     }
 
     function getRGB(colorName) {
@@ -166,7 +168,7 @@
       return colors[colorName] || "0,0,0";
     }
 
-    function makeDraggable(el) {
+    function makeDraggable(el, controlBox) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
@@ -182,6 +184,8 @@
           const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
           el.style.left = `${x}%`;
           el.style.top = `${y}%`;
+          controlBox.style.left = el.style.left;
+          controlBox.style.top = el.style.top;
         }
         if (resizingElement && e.buttons === 1) {
           const rect = container.getBoundingClientRect();
