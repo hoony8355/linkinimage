@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator with 핫스팟 왼쪽위 외부에 버튼 배치
+// JavaScript logic for Image Map Generator – 버튼 위치 버그 수정 및 마진 추가
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -63,14 +63,17 @@ function addHotspot() {
   label.innerText = `${title} (${href})`;
   div.appendChild(label);
 
+  container.appendChild(div); // append first so offsetTop is valid
+
   const controls = document.createElement("div");
   controls.className = "controls";
   controls.style.position = "absolute";
-  controls.style.left = "-80px";
-  controls.style.top = "-32px";
+  controls.style.left = `${div.offsetLeft}px`;
+  controls.style.top = `${div.offsetTop - 36}px`;
   controls.style.zIndex = "10";
   controls.style.display = "flex";
   controls.style.gap = "4px";
+  controls.style.marginBottom = "4px";
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -119,7 +122,6 @@ function addHotspot() {
   controls.appendChild(resizeBtn);
   controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
-  container.appendChild(div);
   container.appendChild(controls);
 
   makeDraggable(div, controls);
@@ -158,8 +160,8 @@ function makeDraggable(el, controls) {
       const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
       el.style.left = `${x}%`;
       el.style.top = `${y}%`;
-      controls.style.left = `calc(${el.style.left} - 80px)`;
-      controls.style.top = `calc(${el.style.top} - 32px)`;
+      controls.style.left = `${el.offsetLeft}px`;
+      controls.style.top = `${el.offsetTop - 36}px`;
     }
     if (resizingElement && e.buttons === 1) {
       const rect = container.getBoundingClientRect();
