@@ -3,8 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>22 CSS-based Image Map Generator</title>
+  <title>CSS-based Image Map Generator</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body, #image-container, .hotspot {
+      user-select: none;
+    }
+    .resizing {
+      outline: 2px dashed #555;
+    }
+    .hotspot-controls {
+      margin-top: 4px;
+      display: flex;
+      gap: 4px;
+      justify-content: flex-start;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
   <h1>CSS-based Image Map Generator</h1>
@@ -31,11 +46,14 @@
     <button onclick="generateCode()">코드 생성</button>
   </div>
 
-  <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다"></textarea>
+  <div id="hotspot-controls-area"></div>
+
+  <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다" style="user-select: text;"></textarea>
 
   <script>
     const preview = document.getElementById("preview");
     const container = document.getElementById("image-container");
+    const controlArea = document.getElementById("hotspot-controls-area");
     let imageWidth = 1080, imageHeight = 6503;
     let hotspotIndex = 0;
     let resizingElement = null;
@@ -76,7 +94,8 @@
       div.style.top = "10%";
       div.style.width = "20%";
       div.style.height = "5%";
-      div.style.borderColor = color;
+      div.style.position = "absolute";
+      div.style.border = `2px dashed ${color}`;
       div.style.backgroundColor = `rgba(${getRGB(color)}, 0.2)`;
 
       div.setAttribute("data-href", href);
@@ -84,42 +103,51 @@
 
       const label = document.createElement("span");
       label.innerText = `${title} (${href})`;
+      label.style.fontSize = "10px";
+      label.style.background = "#fff";
+      label.style.padding = "2px";
+      label.style.display = "block";
       div.appendChild(label);
 
-      const controlWrap = document.createElement("div");
-      controlWrap.className = "controls";
+      container.appendChild(div);
+      makeDraggable(div);
+      attachExternalControls(div);
+    }
+
+    function attachExternalControls(div) {
+      const controlBox = document.createElement("div");
+      controlBox.className = "hotspot-controls";
 
       const editBtn = document.createElement("button");
-      editBtn.innerText = "✏️";
+      editBtn.innerText = "✏️ 수정";
       editBtn.onclick = () => {
         const newHref = prompt("새 링크 주소:", div.getAttribute("data-href")) || "#";
         const newTitle = prompt("새 타이틀:", div.getAttribute("data-title")) || "";
         div.setAttribute("data-href", newHref);
         div.setAttribute("data-title", newTitle);
-        label.innerText = `${newTitle} (${newHref})`;
+        div.querySelector("span").innerText = `${newTitle} (${newHref})`;
       };
 
       const resizeBtn = document.createElement("button");
-      resizeBtn.innerText = "📐";
+      resizeBtn.innerText = "📐 크기 조정";
       resizeBtn.onclick = () => {
-        if (resizingElement) {
-          resizingElement.classList.remove("resizing");
-        }
+        if (resizingElement) resizingElement.classList.remove("resizing");
         resizingElement = div;
         div.classList.add("resizing");
       };
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.innerText = "❌";
-      deleteBtn.onclick = () => container.removeChild(div);
+      deleteBtn.innerText = "❌ 삭제";
+      deleteBtn.onclick = () => {
+        container.removeChild(div);
+        controlBox.remove();
+      };
 
-      controlWrap.appendChild(editBtn);
-      controlWrap.appendChild(resizeBtn);
-      controlWrap.appendChild(deleteBtn);
-      div.appendChild(controlWrap);
+      controlBox.appendChild(editBtn);
+      controlBox.appendChild(resizeBtn);
+      controlBox.appendChild(deleteBtn);
 
-      container.appendChild(div);
-      makeDraggable(div);
+      controlArea.appendChild(controlBox);
     }
 
     function getRGB(colorName) {
@@ -138,8 +166,7 @@
     function makeDraggable(el) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
-        if (e.target.classList.contains("controls") || e.target.tagName === 'BUTTON' || e.target.tagName === 'SPAN') return;
-        if (resizingElement === el) return; // resizing mode skip dragging
+        if (resizingElement === el) return;
         isDragging = true;
         startX = e.offsetX;
         startY = e.offsetY;
@@ -158,8 +185,8 @@
           const bottom = ((e.clientY - rect.top) / rect.height) * 100;
           const left = parseFloat(resizingElement.style.left);
           const top = parseFloat(resizingElement.style.top);
-          resizingElement.style.width = `${right - left}%`;
-          resizingElement.style.height = `${bottom - top}%`;
+          resizingElement.style.width = `${Math.max(right - left, 1)}%`;
+          resizingElement.style.height = `${Math.max(bottom - top, 1)}%`;
         }
       });
       document.addEventListener("mouseup", () => {
