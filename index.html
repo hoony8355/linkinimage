@@ -32,6 +32,16 @@
       border: 2px dashed red;
       background: rgba(255, 0, 0, 0.2);
       cursor: move;
+      resize: both;
+      overflow: auto;
+    }
+    .hotspot span {
+      display: block;
+      font-size: 10px;
+      color: #333;
+      background: #fff;
+      padding: 2px;
+      border-top: 1px solid #ccc;
     }
     #code-output {
       width: 100%;
@@ -50,7 +60,17 @@
   <h1>CSS-based Image Map Generator</h1>
 
   <div class="uploader">
-    <input type="file" id="image-upload" accept="image/*" />
+    <div>
+      <label>이미지 업로드:
+        <input type="file" id="image-upload" accept="image/*" />
+      </label>
+    </div>
+    <div style="margin-top: 1rem;">
+      <label>이미지 URL 입력:
+        <input type="text" id="image-url" placeholder="https://example.com/image.jpg" style="width: 60%;" />
+        <button onclick="loadImageFromURL()">불러오기</button>
+      </label>
+    </div>
   </div>
 
   <div id="image-container">
@@ -68,6 +88,9 @@
     const preview = document.getElementById("preview");
     const container = document.getElementById("image-container");
     let imageWidth = 1080, imageHeight = 6503; // Default, will update on image load
+    let hotspotIndex = 0;
+
+    const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
     document.getElementById("image-upload").addEventListener("change", (e) => {
       const file = e.target.files[0];
@@ -78,30 +101,62 @@
       reader.readAsDataURL(file);
     });
 
+    function loadImageFromURL() {
+      const url = document.getElementById("image-url").value;
+      if (url) {
+        preview.src = url;
+      }
+    }
+
     preview.onload = () => {
       imageWidth = preview.naturalWidth;
       imageHeight = preview.naturalHeight;
     };
 
     function addHotspot() {
+      const href = prompt("링크 주소를 입력하세요:") || "#";
+      const title = prompt("링크 타이틀을 입력하세요:") || "";
       const div = document.createElement("div");
       div.className = "hotspot";
-      div.contentEditable = false;
+
+      const color = colors[hotspotIndex % colors.length];
+      hotspotIndex++;
+
       div.style.left = "10%";
       div.style.top = "10%";
       div.style.width = "20%";
       div.style.height = "5%";
+      div.style.borderColor = color;
+      div.style.backgroundColor = `rgba(${getRGB(color)}, 0.2)`;
 
-      div.setAttribute("data-href", prompt("링크 주소를 입력하세요:"));
-      div.setAttribute("data-title", prompt("링크 타이틀을 입력하세요:"));
+      div.setAttribute("data-href", href);
+      div.setAttribute("data-title", title);
+
+      const label = document.createElement("span");
+      label.innerText = `${title} (${href})`;
+      div.appendChild(label);
 
       container.appendChild(div);
       makeDraggable(div);
     }
 
+    function getRGB(colorName) {
+      const colors = {
+        red: "255,0,0",
+        blue: "0,0,255",
+        green: "0,128,0",
+        orange: "255,165,0",
+        purple: "128,0,128",
+        teal: "0,128,128",
+        brown: "165,42,42"
+      };
+      return colors[colorName] || "0,0,0";
+    }
+
     function makeDraggable(el) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
+        if (e.target.tagName === 'SPAN') return; // Don't drag by label
         isDragging = true;
         startX = e.offsetX;
         startY = e.offsetY;
@@ -119,13 +174,13 @@
     }
 
     function generateCode() {
-      let output = `<div style="position: relative; max-width: ${imageWidth}px; margin: auto;">\n`;
-      output += `  <img src="IMAGE_URL_HERE" style="width: 100%; display: block;" alt="포스터" />\n\n`;
+      let output = `<div style=\"position: relative; max-width: ${imageWidth}px; margin: auto;\">\n`;
+      output += `  <img src=\"${preview.src}\" style=\"width: 100%; display: block;\" alt=\"포스터\" />\n\n`;
 
       document.querySelectorAll(".hotspot").forEach((el) => {
         const href = el.getAttribute("data-href") || "#";
         const title = el.getAttribute("data-title") || "";
-        output += `  <a href="${href}" target="_blank" title="${title}" style="position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;"></a>\n`;
+        output += `  <a href=\"${href}\" target=\"_blank\" title=\"${title}\" style=\"position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;\"></a>\n`;
       });
 
       output += `</div>`;
