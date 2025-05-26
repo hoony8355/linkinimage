@@ -29,6 +29,13 @@
       font-size: 12px;
       cursor: pointer;
     }
+    #code-options {
+      margin-top: 10px;
+    }
+    #test-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -54,13 +61,21 @@
   <div style="text-align: center">
     <button onclick="addHotspot()">+ 버튼 추가</button>
     <button onclick="generateCode()">코드 생성</button>
+    <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
   </div>
 
-  <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다" style="user-select: text;"></textarea>
+  <div id="code-options" style="text-align: center; display: none;">
+    <label><input type="radio" name="code-type" value="css" checked> CSS 방식</label>
+    <label><input type="radio" name="code-type" value="html"> HTML map 방식</label>
+  </div>
+
+  <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다" style="user-select: text; width: 100%; height: 200px;"></textarea>
 
   <script>
     const preview = document.getElementById("preview");
     const container = document.getElementById("image-container");
+    const testBtn = document.getElementById("test-button");
+    const codeOptions = document.getElementById("code-options");
     let imageWidth = 1080, imageHeight = 6503;
     let hotspotIndex = 0;
     let resizingElement = null;
@@ -134,9 +149,17 @@
       const resizeBtn = document.createElement("button");
       resizeBtn.innerText = "📐";
       resizeBtn.onclick = () => {
-        if (resizingElement) resizingElement.classList.remove("resizing");
-        resizingElement = div;
-        div.classList.add("resizing");
+        const isActive = resizingElement === div;
+        if (isActive) {
+          div.classList.remove("resizing");
+          resizingElement = null;
+          resizeBtn.style.background = "";
+        } else {
+          if (resizingElement) resizingElement.classList.remove("resizing");
+          resizingElement = div;
+          div.classList.add("resizing");
+          resizeBtn.style.background = "#d0e0ff";
+        }
       };
 
       const deleteBtn = document.createElement("button");
@@ -149,6 +172,7 @@
       controlBox.appendChild(editBtn);
       controlBox.appendChild(resizeBtn);
       controlBox.appendChild(deleteBtn);
+
       container.appendChild(controlBox);
       container.appendChild(div);
 
@@ -207,17 +231,42 @@
     }
 
     function generateCode() {
-      let output = `<div style=\"position: relative; max-width: ${imageWidth}px; margin: auto;\">\n`;
-      output += `  <img src=\"${preview.src}\" style=\"width: 100%; display: block;\" alt=\"포스터\" />\n\n`;
+      const codeType = document.querySelector('input[name="code-type"]:checked').value;
+      let output = "";
 
-      document.querySelectorAll(".hotspot").forEach((el) => {
-        const href = el.getAttribute("data-href") || "#";
-        const title = el.getAttribute("data-title") || "";
-        output += `  <a href=\"${href}\" target=\"_blank\" title=\"${title}\" style=\"position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;\"></a>\n`;
-      });
+      if (codeType === "css") {
+        output += `<div style=\"position: relative; max-width: ${imageWidth}px; margin: auto;\">\n`;
+        output += `  <img src=\"${preview.src}\" style=\"width: 100%; display: block;\" alt=\"포스터\" />\n\n`;
+        document.querySelectorAll(".hotspot").forEach((el) => {
+          const href = el.getAttribute("data-href") || "#";
+          const title = el.getAttribute("data-title") || "";
+          output += `  <a href=\"${href}\" target=\"_blank\" title=\"${title}\" style=\"position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;\"></a>\n`;
+        });
+        output += `</div>`;
+      } else {
+        output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
+        document.querySelectorAll(".hotspot").forEach((el) => {
+          const href = el.getAttribute("data-href") || "#";
+          const title = el.getAttribute("data-title") || "";
+          const x = parseFloat(el.style.left) / 100 * imageWidth;
+          const y = parseFloat(el.style.top) / 100 * imageHeight;
+          const w = parseFloat(el.style.width) / 100 * imageWidth;
+          const h = parseFloat(el.style.height) / 100 * imageHeight;
+          output += `  <area shape=\"rect\" coords=\"${Math.round(x)},${Math.round(y)},${Math.round(x+w)},${Math.round(y+h)}\" href=\"${href}\" alt=\"${title}\" title=\"${title}\" />\n`;
+        });
+        output += `</map>`;
+      }
 
-      output += `</div>`;
       document.getElementById("code-output").value = output;
+      codeOptions.style.display = "block";
+      testBtn.disabled = false;
+    }
+
+    function testGeneratedCode() {
+      const win = window.open();
+      const code = document.getElementById("code-output").value;
+      win.document.write(`<html><body>${code}</body></html>`);
+      win.document.close();
     }
   </script>
 </body>
