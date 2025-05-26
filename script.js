@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator
+// JavaScript logic for Image Map Generator (크기조절 버튼 상태 복원 수정 포함)
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -7,6 +7,7 @@ const codeOptions = document.getElementById("code-options");
 let imageWidth = 1080, imageHeight = 6503;
 let hotspotIndex = 0;
 let resizingElement = null;
+let currentResizeButton = null;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
@@ -75,10 +76,15 @@ function addHotspot() {
     if (isActive) {
       div.classList.remove("resizing");
       resizingElement = null;
+      currentResizeButton = null;
       resizeBtn.style.background = "";
     } else {
-      if (resizingElement) resizingElement.classList.remove("resizing");
+      if (resizingElement) {
+        resizingElement.classList.remove("resizing");
+        if (currentResizeButton) currentResizeButton.style.background = "";
+      }
       resizingElement = div;
+      currentResizeButton = resizeBtn;
       div.classList.add("resizing");
       resizeBtn.style.background = "#d0e0ff";
     }
@@ -95,7 +101,6 @@ function addHotspot() {
   container.appendChild(div);
   makeDraggable(div);
 
-  // 자동 스크롤 이동
   setTimeout(() => {
     div.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 100);
@@ -145,7 +150,9 @@ function makeDraggable(el) {
     isDragging = false;
     if (resizingElement) {
       resizingElement.classList.remove("resizing");
+      if (currentResizeButton) currentResizeButton.style.background = "";
       resizingElement = null;
+      currentResizeButton = null;
     }
   });
 }
