@@ -1,4 +1,4 @@
-// JavaScript logic for Image Map Generator – 버튼 위치 버그 수정 및 마진 추가
+// JavaScript logic for Image Map Generator – 확대/축소 시 핫스팟 비율 유지 및 슬라이더 확대 추가
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
@@ -9,34 +9,50 @@ let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
 let isResizeModePersistent = false;
-let isZoomOutMode = false;
+let zoomScale = 1.0;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
-document.getElementById("image-upload").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    preview.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
-});
+const zoomSlider = document.getElementById("zoom-slider");
+if (zoomSlider) {
+  zoomSlider.addEventListener("input", () => {
+    const scale = parseFloat(zoomSlider.value);
+    setZoom(scale);
+  });
+}
 
-function loadImageFromURL() {
-  const url = document.getElementById("image-url").value;
-  if (url) preview.src = url;
+function setZoom(scale) {
+  zoomScale = scale;
+  preview.style.transform = `scale(${scale})`;
+  preview.style.transformOrigin = "top left";
+  container.style.transform = `scale(${scale})`;
+  container.style.transformOrigin = "top left";
+
+  document.querySelectorAll(".hotspot").forEach((el) => {
+    const baseLeft = parseFloat(el.getAttribute("data-base-left")) || parseFloat(el.style.left);
+    const baseTop = parseFloat(el.getAttribute("data-base-top")) || parseFloat(el.style.top);
+    const baseWidth = parseFloat(el.getAttribute("data-base-width")) || parseFloat(el.style.width);
+    const baseHeight = parseFloat(el.getAttribute("data-base-height")) || parseFloat(el.style.height);
+
+    el.style.left = `${baseLeft}%`;
+    el.style.top = `${baseTop}%`;
+    el.style.width = `${baseWidth}%`;
+    el.style.height = `${baseHeight}%`;
+
+    el.setAttribute("data-base-left", baseLeft);
+    el.setAttribute("data-base-top", baseTop);
+    el.setAttribute("data-base-width", baseWidth);
+    el.setAttribute("data-base-height", baseHeight);
+  });
 }
 
 function toggleZoomOut(zoomBtn) {
-  isZoomOutMode = !isZoomOutMode;
-  if (isZoomOutMode) {
-    preview.style.maxHeight = "80vh";
-    preview.style.objectFit = "contain";
-    zoomBtn.style.background = "#c4f4c4";
-  } else {
-    preview.style.maxHeight = "unset";
-    preview.style.objectFit = "unset";
+  if (zoomScale !== 1) {
+    setZoom(1);
     zoomBtn.style.background = "";
+  } else {
+    setZoom(0.5); // default zoom out level
+    zoomBtn.style.background = "#c4f4c4";
   }
 }
 
