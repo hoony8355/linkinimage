@@ -33,7 +33,7 @@
       background: rgba(255, 0, 0, 0.2);
       cursor: move;
       resize: both;
-      overflow: auto;
+      overflow: hidden;
     }
     .hotspot span {
       display: block;
@@ -42,6 +42,17 @@
       background: #fff;
       padding: 2px;
       border-top: 1px solid #ccc;
+      white-space: nowrap;
+    }
+    .hotspot .controls {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 2px;
+      cursor: pointer;
     }
     #code-output {
       width: 100%;
@@ -53,6 +64,10 @@
     button {
       padding: 0.5rem 1rem;
       margin-top: 1rem;
+    }
+    #image-url {
+      width: 60%;
+      padding: 0.3rem;
     }
   </style>
 </head>
@@ -66,10 +81,9 @@
       </label>
     </div>
     <div style="margin-top: 1rem;">
-      <label>이미지 URL 입력:
-        <input type="text" id="image-url" placeholder="https://example.com/image.jpg" style="width: 60%;" />
-        <button onclick="loadImageFromURL()">불러오기</button>
-      </label>
+      <label>이미지 URL 입력:</label><br />
+      <input type="text" id="image-url" placeholder="https://example.com/image.jpg" />
+      <button onclick="loadImageFromURL()">불러오기</button>
     </div>
   </div>
 
@@ -87,7 +101,7 @@
   <script>
     const preview = document.getElementById("preview");
     const container = document.getElementById("image-container");
-    let imageWidth = 1080, imageHeight = 6503; // Default, will update on image load
+    let imageWidth = 1080, imageHeight = 6503;
     let hotspotIndex = 0;
 
     const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
@@ -136,6 +150,23 @@
       label.innerText = `${title} (${href})`;
       div.appendChild(label);
 
+      const controls = document.createElement("div");
+      controls.className = "controls";
+      controls.innerText = "✏️/❌";
+      controls.onclick = () => {
+        const mode = prompt("'1'을 입력하면 편집, '2'를 입력하면 삭제:");
+        if (mode === "1") {
+          const newHref = prompt("새 링크 주소:", div.getAttribute("data-href")) || "#";
+          const newTitle = prompt("새 타이틀:", div.getAttribute("data-title")) || "";
+          div.setAttribute("data-href", newHref);
+          div.setAttribute("data-title", newTitle);
+          label.innerText = `${newTitle} (${newHref})`;
+        } else if (mode === "2") {
+          container.removeChild(div);
+        }
+      };
+      div.appendChild(controls);
+
       container.appendChild(div);
       makeDraggable(div);
     }
@@ -156,7 +187,7 @@
     function makeDraggable(el) {
       let isDragging = false, startX, startY;
       el.addEventListener("mousedown", function (e) {
-        if (e.target.tagName === 'SPAN') return; // Don't drag by label
+        if (e.target.classList.contains("controls") || e.target.tagName === 'SPAN') return;
         isDragging = true;
         startX = e.offsetX;
         startY = e.offsetY;
