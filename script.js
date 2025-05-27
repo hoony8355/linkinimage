@@ -1,11 +1,10 @@
-// Linkin Image JS – 스케일과 무관한 코드 좌표 정확성 유지
+// Linkin Image JS – 확대/축소 기능 제거, 코드 생성 정확도 향상
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
 const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
-const zoomSlider = document.getElementById("zoom-slider");
 
 let imageWidth = 1080, imageHeight = 6503;
 let hotspotIndex = 0;
@@ -15,7 +14,6 @@ let isResizeModePersistent = false;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
-// 이미지 업로드
 const imageUpload = document.getElementById("image-upload");
 if (imageUpload) {
   imageUpload.addEventListener("change", (e) => {
@@ -23,7 +21,10 @@ if (imageUpload) {
     if (file) {
       const reader = new FileReader();
       reader.onload = function (event) {
-        preview.onload = () => setZoom(parseFloat(zoomSlider.value));
+        preview.onload = () => {
+          imageWidth = preview.naturalWidth;
+          imageHeight = preview.naturalHeight;
+        };
         preview.src = event.target.result;
       };
       reader.readAsDataURL(file);
@@ -31,32 +32,15 @@ if (imageUpload) {
   });
 }
 
-// 이미지 URL 입력
 function loadImageFromURL() {
   const url = document.getElementById("image-url").value.trim();
   if (url) {
     preview.crossOrigin = "anonymous";
-    preview.onload = () => setZoom(parseFloat(zoomSlider.value));
+    preview.onload = () => {
+      imageWidth = preview.naturalWidth;
+      imageHeight = preview.naturalHeight;
+    };
     preview.src = url;
-  }
-}
-
-// 확대/축소 슬라이더
-if (zoomSlider) {
-  zoomSlider.addEventListener("input", () => {
-    const scale = parseFloat(zoomSlider.value);
-    setZoom(scale);
-  });
-}
-
-function setZoom(scale) {
-  imageWrapper.style.transform = `scale(${scale})`;
-  imageWrapper.style.transformOrigin = "center top";
-
-  // wrapper 높이 보정
-  if (preview.complete && preview.offsetHeight > 0) {
-    const realHeight = preview.offsetHeight;
-    imageWrapper.style.height = `${realHeight * scale}px`;
   }
 }
 
@@ -122,15 +106,6 @@ function addHotspot() {
     }
   };
 
-  const zoomBtn = document.createElement("button");
-  zoomBtn.innerText = "🔍";
-  zoomBtn.onclick = () => {
-    const newScale = imageWrapper.style.transform === "scale(1)" ? 0.5 : 1;
-    zoomSlider.value = newScale;
-    setZoom(newScale);
-    zoomBtn.style.background = newScale < 1 ? "#c4f4c4" : "";
-  };
-
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
   deleteBtn.onclick = () => {
@@ -140,7 +115,6 @@ function addHotspot() {
 
   controls.appendChild(editBtn);
   controls.appendChild(resizeBtn);
-  controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
   imageWrapper.appendChild(controls);
 
@@ -218,7 +192,6 @@ function generateCode() {
     });
     output += `</div>`;
   } else {
-    // HTML map 방식은 항상 원본 기준으로 계산 (scale 고려 안함)
     output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
