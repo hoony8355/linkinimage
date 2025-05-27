@@ -1,7 +1,8 @@
-// JavaScript logic for Image Map Generator – 리팩토링 및 이미지 URL 불러오기 수정
+// JavaScript for Linkin Image - 중앙 정렬, 확대/축소 대응 개선
 
 const preview = document.getElementById("preview");
 const container = document.getElementById("image-container");
+const wrapper = document.getElementById("scale-wrapper");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 const zoomSlider = document.getElementById("zoom-slider");
@@ -11,7 +12,6 @@ let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
 let isResizeModePersistent = false;
-let zoomScale = 1.0;
 
 const colors = ["red", "blue", "green", "orange", "purple", "teal", "brown"];
 
@@ -30,11 +30,11 @@ if (imageUpload) {
   });
 }
 
-// 이미지 URL 로드
+// 이미지 URL 입력 불러오기
 function loadImageFromURL() {
   const url = document.getElementById("image-url").value.trim();
   if (url) {
-    preview.crossOrigin = "anonymous"; // 크로스도메인 오류 방지 시도
+    preview.crossOrigin = "anonymous";
     preview.src = url;
   }
 }
@@ -48,9 +48,8 @@ if (zoomSlider) {
 }
 
 function setZoom(scale) {
-  zoomScale = scale;
-  container.style.transform = `scale(${scale})`;
-  container.style.transformOrigin = "top left";
+  wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.transformOrigin = "center top";
 }
 
 function addHotspot() {
@@ -71,10 +70,6 @@ function addHotspot() {
 
   div.setAttribute("data-href", href);
   div.setAttribute("data-title", title);
-  div.setAttribute("data-base-left", "10");
-  div.setAttribute("data-base-top", "10");
-  div.setAttribute("data-base-width", "20");
-  div.setAttribute("data-base-height", "5");
 
   const label = document.createElement("span");
   label.innerText = `${title} (${href})`;
@@ -84,12 +79,8 @@ function addHotspot() {
 
   const controls = document.createElement("div");
   controls.className = "controls";
-  controls.style.position = "absolute";
   controls.style.left = `${div.offsetLeft}px`;
-  controls.style.top = `${div.offsetTop - 60}px`;
-  controls.style.zIndex = "10";
-  controls.style.display = "flex";
-  controls.style.gap = "4px";
+  controls.style.top = `${div.offsetTop - 55}px`;
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -125,7 +116,12 @@ function addHotspot() {
 
   const zoomBtn = document.createElement("button");
   zoomBtn.innerText = "🔍";
-  zoomBtn.onclick = () => toggleZoomOut(zoomBtn);
+  zoomBtn.onclick = () => {
+    const newScale = wrapper.style.transform === "scale(1)" ? 0.5 : 1;
+    zoomSlider.value = newScale;
+    setZoom(newScale);
+    zoomBtn.style.background = newScale < 1 ? "#c4f4c4" : "";
+  };
 
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "❌";
@@ -145,16 +141,6 @@ function addHotspot() {
   setTimeout(() => {
     div.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 100);
-}
-
-function toggleZoomOut(zoomBtn) {
-  if (zoomScale !== 1) {
-    setZoom(1);
-    zoomBtn.style.background = "";
-  } else {
-    setZoom(0.5);
-    zoomBtn.style.background = "#c4f4c4";
-  }
 }
 
 function getRGB(colorName) {
