@@ -31,23 +31,27 @@
     <button onclick="loadImageFromURL()">불러오기</button>
   </div>
 
-  <div class="zoom-control" style="text-align:center; margin-bottom: 1rem;">
+  <div class="zoom-control">
     <label>확대/축소 비율:</label>
     <input type="range" id="zoom-slider" min="0.3" max="1.5" step="0.01" value="1" />
   </div>
 
   <div id="image-container">
+    <!-- 축소 대상 -->
     <div id="image-wrapper" class="image-wrapper">
       <img id="preview" src="" alt="Preview" />
+      <!-- 핫스팟 및 컨트롤이 여기에 append 됩니다 -->
     </div>
 
+    <!-- 고정된 버튼 영역 -->
     <div class="button-group">
       <button onclick="addHotspot()">+ 버튼 추가</button>
       <button onclick="generateCode()">코드 생성</button>
       <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
     </div>
 
-    <div id="code-options" style="text-align: center; display: none;">
+    <!-- 코드 출력 관련 -->
+    <div id="code-options" style="display: none;">
       <label><input type="radio" name="code-type" value="css" checked> CSS 방식</label>
       <label><input type="radio" name="code-type" value="html"> HTML map 방식</label>
     </div>
