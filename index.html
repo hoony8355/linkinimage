@@ -7,6 +7,7 @@
   <meta name="description" content="이미지에 원하는 영역을 지정해 링크를 삽입해보세요. HTML image map 또는 CSS 기반 코드로 손쉽게 복사 가능합니다. 블로그, 뉴스레터, 랜딩페이지 등 어디서나 활용 가능한 이미지 링크 삽입 도구입니다." />
   <meta name="keywords" content="이미지 링크 넣기, 이미지 맵 생성기, HTML 이미지맵, CSS image map, 이미지에 링크 추가, 링크 있는 이미지, image map tool, 링크 이미지, 링크 이미지 삽입, 링크 이미지 만들기, 이미지 링크 삽입 사이트" />
   <link rel="stylesheet" href="style.css">
+  <meta name="google-site-verification" content="RNqJmCaI831T3albJcCH4w0RE5zu2LOvZsY6tXM65Cc" />
 </head>
 <body>
   <h1>링킨이미지 (Linkin Image)</h1>
@@ -49,14 +50,16 @@
     <input type="range" id="zoom-slider" min="0.3" max="1.5" step="0.01" value="1" style="width: 200px; vertical-align: middle;">
   </div>
 
-  <div id="image-container">
-    <img id="preview" src="" alt="Preview" />
-  </div>
+  <div id="layout-wrapper">
+    <div id="image-container">
+      <img id="preview" src="" alt="Preview" />
+    </div>
 
-  <div style="text-align: center">
-    <button onclick="addHotspot()">+ 버튼 추가</button>
-    <button onclick="generateCode()">코드 생성</button>
-    <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
+    <div style="text-align: center; margin-top: 1rem;">
+      <button onclick="addHotspot()">+ 버튼 추가</button>
+      <button onclick="generateCode()">코드 생성</button>
+      <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
+    </div>
   </div>
 
   <div id="code-options" style="text-align: center; display: none;">
