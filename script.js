@@ -1,4 +1,4 @@
-// Linkin Image JS – 이미지만 축소, 버튼/코드 고정
+// Linkin Image JS – 이미지만 축소 + 높이 동기화
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -23,6 +23,7 @@ if (imageUpload) {
     if (file) {
       const reader = new FileReader();
       reader.onload = function (event) {
+        preview.onload = () => setZoom(parseFloat(zoomSlider.value));
         preview.src = event.target.result;
       };
       reader.readAsDataURL(file);
@@ -35,6 +36,7 @@ function loadImageFromURL() {
   const url = document.getElementById("image-url").value.trim();
   if (url) {
     preview.crossOrigin = "anonymous";
+    preview.onload = () => setZoom(parseFloat(zoomSlider.value));
     preview.src = url;
   }
 }
@@ -50,6 +52,12 @@ if (zoomSlider) {
 function setZoom(scale) {
   imageWrapper.style.transform = `scale(${scale})`;
   imageWrapper.style.transformOrigin = "center top";
+
+  // 이미지 로드 완료 후 크기 측정 → wrapper 높이 조절
+  if (preview.complete && preview.offsetHeight > 0) {
+    const realHeight = preview.offsetHeight;
+    imageWrapper.style.height = `${realHeight * scale}px`;
+  }
 }
 
 function addHotspot() {
