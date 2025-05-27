@@ -1,4 +1,4 @@
-// Linkin Image JS – 이미지만 축소 + 높이 동기화
+// Linkin Image JS – 스케일과 무관한 코드 좌표 정확성 유지
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -53,7 +53,7 @@ function setZoom(scale) {
   imageWrapper.style.transform = `scale(${scale})`;
   imageWrapper.style.transformOrigin = "center top";
 
-  // 이미지 로드 완료 후 크기 측정 → wrapper 높이 조절
+  // wrapper 높이 보정
   if (preview.complete && preview.offsetHeight > 0) {
     const realHeight = preview.offsetHeight;
     imageWrapper.style.height = `${realHeight * scale}px`;
@@ -218,6 +218,7 @@ function generateCode() {
     });
     output += `</div>`;
   } else {
+    // HTML map 방식은 항상 원본 기준으로 계산 (scale 고려 안함)
     output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
