@@ -86,7 +86,7 @@ function addHotspot() {
   controls.className = "controls";
   controls.style.position = "absolute";
   controls.style.left = `${div.offsetLeft}px`;
-  controls.style.top = `${div.offsetTop - 44}px`;
+  controls.style.top = `${div.offsetTop - 60}px`;
   controls.style.zIndex = "10";
   controls.style.display = "flex";
   controls.style.gap = "4px";
