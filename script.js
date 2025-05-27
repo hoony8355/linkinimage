@@ -1,8 +1,8 @@
-// JavaScript for Linkin Image - 중앙 정렬, 확대/축소 대응 개선
+// Linkin Image JS – 이미지만 축소, 버튼/코드 고정
 
 const preview = document.getElementById("preview");
+const imageWrapper = document.getElementById("image-wrapper");
 const container = document.getElementById("image-container");
-const wrapper = document.getElementById("scale-wrapper");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 const zoomSlider = document.getElementById("zoom-slider");
@@ -30,7 +30,7 @@ if (imageUpload) {
   });
 }
 
-// 이미지 URL 입력 불러오기
+// 이미지 URL 입력
 function loadImageFromURL() {
   const url = document.getElementById("image-url").value.trim();
   if (url) {
@@ -48,8 +48,8 @@ if (zoomSlider) {
 }
 
 function setZoom(scale) {
-  wrapper.style.transform = `scale(${scale})`;
-  wrapper.style.transformOrigin = "center top";
+  imageWrapper.style.transform = `scale(${scale})`;
+  imageWrapper.style.transformOrigin = "center top";
 }
 
 function addHotspot() {
@@ -75,12 +75,12 @@ function addHotspot() {
   label.innerText = `${title} (${href})`;
   div.appendChild(label);
 
-  container.appendChild(div);
+  imageWrapper.appendChild(div);
 
   const controls = document.createElement("div");
   controls.className = "controls";
   controls.style.left = `${div.offsetLeft}px`;
-  controls.style.top = `${div.offsetTop - 55}px`;
+  controls.style.top = `${div.offsetTop - 36}px`;
 
   const editBtn = document.createElement("button");
   editBtn.innerText = "✏️";
@@ -117,7 +117,7 @@ function addHotspot() {
   const zoomBtn = document.createElement("button");
   zoomBtn.innerText = "🔍";
   zoomBtn.onclick = () => {
-    const newScale = wrapper.style.transform === "scale(1)" ? 0.5 : 1;
+    const newScale = imageWrapper.style.transform === "scale(1)" ? 0.5 : 1;
     zoomSlider.value = newScale;
     setZoom(newScale);
     zoomBtn.style.background = newScale < 1 ? "#c4f4c4" : "";
@@ -134,7 +134,7 @@ function addHotspot() {
   controls.appendChild(resizeBtn);
   controls.appendChild(zoomBtn);
   controls.appendChild(deleteBtn);
-  container.appendChild(controls);
+  imageWrapper.appendChild(controls);
 
   makeDraggable(div, controls);
 
@@ -167,7 +167,7 @@ function makeDraggable(el, controls) {
   });
   document.addEventListener("mousemove", function (e) {
     if (isDragging) {
-      const rect = container.getBoundingClientRect();
+      const rect = imageWrapper.getBoundingClientRect();
       const x = ((e.clientX - rect.left - startX) / rect.width) * 100;
       const y = ((e.clientY - rect.top - startY) / rect.height) * 100;
       el.style.left = `${x}%`;
@@ -176,7 +176,7 @@ function makeDraggable(el, controls) {
       controls.style.top = `${el.offsetTop - 36}px`;
     }
     if (resizingElement && e.buttons === 1) {
-      const rect = container.getBoundingClientRect();
+      const rect = imageWrapper.getBoundingClientRect();
       const right = ((e.clientX - rect.left) / rect.width) * 100;
       const bottom = ((e.clientY - rect.top) / rect.height) * 100;
       const left = parseFloat(resizingElement.style.left);
