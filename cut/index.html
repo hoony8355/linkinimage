@@ -11,6 +11,7 @@
     .preview-item { border: 1px solid #ccc; padding: 8px; }
     textarea { width: 100%; height: 200px; margin-top: 20px; }
     #log { background: #f0f0f0; padding: 10px; font-size: 12px; white-space: pre-wrap; margin-top: 20px; height: 120px; overflow-y: auto; }
+    #testArea { border: 1px solid #ccc; margin-top: 20px; padding: 10px; }
   </style>
 </head>
 <body>
@@ -20,8 +21,11 @@
   <p>이미지 위를 클릭하여 "분할선"을 추가하세요 (가로선 기준)</p>
   <div class="preview" id="preview"></div>
   <button id="uploadBtn">Imgur 업로드 & HTML 생성</button>
+  <button id="testBtn" disabled>🔍 생성된 코드 테스트</button>
   <textarea id="output" placeholder="생성된 HTML 코드가 여기에 표시됩니다"></textarea>
   <div id="log"></div>
+  <h2>미리보기 테스트 영역</h2>
+  <div id="testArea"></div>
 
   <script>
     const CLIENT_ID = '82e27b7d2fe5c86';
@@ -32,6 +36,8 @@
     const preview = document.getElementById('preview');
     const output = document.getElementById('output');
     const uploadBtn = document.getElementById('uploadBtn');
+    const testBtn = document.getElementById('testBtn');
+    const testArea = document.getElementById('testArea');
     const log = document.getElementById('log');
 
     function logMessage(msg) {
@@ -160,6 +166,9 @@
 
     uploadBtn.addEventListener('click', async () => {
       output.value = '이미지를 Imgur에 업로드 중입니다...';
+      testBtn.disabled = true;
+      testArea.innerHTML = '';
+
       try {
         for (let i = 0; i < segments.length; i++) {
           segments[i].url = await uploadToImgur(segments[i].base64, i);
@@ -173,10 +182,17 @@
 
         const html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 1080px; margin: 0 auto; border-collapse: collapse;">\n${rows}\n</table>`;
         output.value = html;
+        testBtn.disabled = false;
         logMessage("✅ HTML 코드 생성 완료");
       } catch (err) {
         logMessage("❌ 오류 발생: " + err.message);
       }
+    });
+
+    testBtn.addEventListener('click', () => {
+      const code = output.value;
+      testArea.innerHTML = code;
+      logMessage("🔍 테스트 렌더링 완료");
     });
   </script>
 </body>
