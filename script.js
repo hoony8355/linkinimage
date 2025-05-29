@@ -1,4 +1,4 @@
-// Linkin Image JS – HTML map 버전 좌표 정확도 개선 및 초기화 코드 리셋
+// Linkin Image JS – HTML map 좌표 정확도 개선
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -6,7 +6,7 @@ const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 
-let imageWidth = 0, imageHeight = 0;
+let imageWidth = 1080, imageHeight = 6503;
 let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
@@ -198,14 +198,22 @@ function generateCode() {
     output += `<img src="${preview.src}" usemap="#image-map" style="width: 100%;">
 <map name="image-map">
 `;
+    const imgRect = preview.getBoundingClientRect();
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
-      const x = parseFloat(el.style.left) / 100 * imageWidth;
-      const y = parseFloat(el.style.top) / 100 * imageHeight;
-      const w = parseFloat(el.style.width) / 100 * imageWidth;
-      const h = parseFloat(el.style.height) / 100 * imageHeight;
-      output += `  <area shape="rect" coords="${Math.round(x)},${Math.round(y)},${Math.round(x+w)},${Math.round(y+h)}" href="${href}" alt="${title}" title="${title}" />
+
+      const left = parseFloat(el.style.left) / 100 * imageWidth;
+      const top = parseFloat(el.style.top) / 100 * imageHeight;
+      const width = parseFloat(el.style.width) / 100 * imageWidth;
+      const height = parseFloat(el.style.height) / 100 * imageHeight;
+
+      const x1 = Math.round(left);
+      const y1 = Math.round(top);
+      const x2 = Math.round(left + width);
+      const y2 = Math.round(top + height);
+
+      output += `  <area shape="rect" coords="${x1},${y1},${x2},${y2}" href="${href}" alt="${title}" title="${title}" />
 `;
     });
     output += `</map>`;
