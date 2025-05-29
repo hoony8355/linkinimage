@@ -45,6 +45,8 @@ function loadImageFromURL() {
 }
 
 function addHotspot() {
+  if (!imageWrapper || !imageWrapper.offsetWidth) return;
+
   const href = prompt("링크 주소를 입력하세요:") || "#";
   const title = prompt("링크 타이틀을 입력하세요:") || "";
   const div = document.createElement("div");
@@ -53,10 +55,16 @@ function addHotspot() {
   const color = colors[hotspotIndex % colors.length];
   hotspotIndex++;
 
-  div.style.left = "10%";
-  div.style.top = "10%";
-  div.style.width = "20%";
-  div.style.height = "5%";
+  // 중앙 정렬된 이미지 영역 기준으로 상대 위치 설정
+  const defaultLeft = imageWrapper.offsetWidth * 0.1;
+  const defaultTop = imageWrapper.offsetHeight * 0.1;
+  const width = imageWrapper.offsetWidth * 0.2;
+  const height = imageWrapper.offsetHeight * 0.05;
+
+  div.style.left = `${(defaultLeft / imageWrapper.offsetWidth) * 100}%`;
+  div.style.top = `${(defaultTop / imageWrapper.offsetHeight) * 100}%`;
+  div.style.width = `${(width / imageWrapper.offsetWidth) * 100}%`;
+  div.style.height = `${(height / imageWrapper.offsetHeight) * 100}%`;
   div.style.borderColor = color;
   div.style.backgroundColor = `rgba(${getRGB(color)}, 0.2)`;
 
