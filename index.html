@@ -1,45 +1,61 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>링킨이미지 | 이미지에 링크 넣기 - 이미지 링크 삽입 사이트</title>
-  <meta name="description" content="링킨이미지(linkin image)는 이미지에 원하는 영역을 설정해 하이퍼링크를 넣을 수 있는 무료 도구입니다. CSS 및 HTML map 방식 모두 지원합니다.">
-  <meta name="keywords" content="이미지에 링크 넣기, 이미지 맵 생성기, HTML image map, CSS image hotspot, 이미지 링크 도구">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>링킨이미지 | Linkin Image – 이미지에 링크 넣기 · 이미지 링크 삽입 사이트</title>
+  <meta name="description" content="이미지에 원하는 영역을 지정해 링크를 삽입해보세요. HTML image map 또는 CSS 기반 코드로 손쉽게 복사 가능합니다. 블로그, 뉴스레터, 랜딩페이지 등 어디서나 활용 가능한 이미지 링크 삽입 도구입니다." />
+  <meta name="keywords" content="이미지 링크 넣기, 이미지 맵 생성기, HTML 이미지맵, CSS image map, 이미지에 링크 추가, 링크 있는 이미지, image map tool, 링크 이미지, 링크 이미지 삽입, 링크 이미지 만들기, 이미지 링크 삽입 사이트" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🔗 링킨이미지 (Linkin Image)</h1>
-  <p class="desc">이미지에 원하는 영역을 지정해 다양한 링크를 넣어보세요. 버튼 추가 → 위치/크기 조절 → 코드 생성 순서로 진행합니다.</p>
+  <h1>링킨이미지 (Linkin Image)</h1>
 
-  <div class="uploader">
+  <section class="guide">
+    <h2>🔍 사용 방법 안내</h2>
+    <ol>
+      <li><strong>이미지 업로드</strong> 또는 <strong>URL 입력</strong>을 통해 이미지를 불러옵니다.</li>
+      <li><strong>+ 버튼 추가</strong>를 눌러 링크를 넣을 영역을 생성합니다.</li>
+      <li>생성된 박스를 원하는 위치와 크기로 조절합니다.</li>
+      <li>링크 주소와 제목을 설정한 뒤, 코드 생성 버튼으로 완성!</li>
+    </ol>
+
+    <h3>🧩 버튼 설명</h3>
+    <ul>
+      <li><strong>✏️ 수정</strong> – 링크 및 제목 변경</li>
+      <li><strong>❌ 삭제</strong> – 핫스팟 제거</li>
+      <li><strong>🔍 확대/축소</strong> – 이미지 및 박스 비율 전환</li>
+    </ul>
+  </section>
+
+    <div class="uploader">
     <label>이미지 업로드:
-      <input type="file" id="image-upload" accept="image/*">
+      <input type="file" id="image-upload" accept="image/*" />
     </label>
     <br><br>
-    <label>이미지 URL 입력:</label>
-    <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+    <label>이미지 URL 입력:</label><br />
+    <input type="text" id="image-url" placeholder="https://example.com/image.jpg" />
     <button onclick="loadImageFromURL()">불러오기</button>
   </div>
 
   <div id="image-container">
-    <div id="image-wrapper">
-      <img id="preview" src="" alt="미리보기 이미지">
+    <div id="image-wrapper" class="image-wrapper">
+      <img id="preview" src="" alt="Preview" />
     </div>
-  </div>
 
-  <div class="button-group">
-    <button onclick="addHotspot()">+ 버튼 추가</button>
-    <button onclick="generateBothCodes()">코드 생성</button>
-    <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
-  </div>
+    <div class="button-group">
+      <button onclick="addHotspot()">+ 버튼 추가</button>
+      <button onclick="generateCode()">코드 생성</button>
+      <button id="test-button" onclick="testGeneratedCode()" disabled>테스트</button>
+    </div>
 
-  <div id="code-options">
-    <label><input type="radio" name="code-type" value="css" checked> CSS 방식</label>
-    <label><input type="radio" name="code-type" value="html"> HTML map 방식</label>
-  </div>
+    <div id="code-options" style="display: none;">
+      <label><input type="radio" name="code-type" value="css" checked> CSS 방식</label>
+      <label><input type="radio" name="code-type" value="html"> HTML map 방식</label>
+    </div>
 
-  <textarea id="code-output" readonly placeholder="생성된 코드가 여기에 표시됩니다"></textarea>
+    <textarea id="code-output" readonly placeholder="코드가 여기에 출력됩니다"></textarea>
+  </div>
 
   <script src="script.js"></script>
 </body>
