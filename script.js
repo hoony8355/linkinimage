@@ -1,4 +1,4 @@
-// Linkin Image Generator JS – HTML map 버전 개선 및 좌표 정확도 향상
+// Linkin Image Generator JS – HTML map 버전 좌표 정확도 개선 포함
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -192,14 +192,22 @@ function generateCode() {
     });
     output += `</div>`;
   } else {
+    // HTML map 버전 (정확한 좌표 계산 추가)
+    const displayWidth = preview.clientWidth;
+    const displayHeight = preview.clientHeight;
+    const scaleX = naturalWidth / displayWidth;
+    const scaleY = naturalHeight / displayHeight;
+
     output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
-      const x = parseFloat(el.style.left) / 100 * naturalWidth;
-      const y = parseFloat(el.style.top) / 100 * naturalHeight;
-      const w = parseFloat(el.style.width) / 100 * naturalWidth;
-      const h = parseFloat(el.style.height) / 100 * naturalHeight;
+
+      const x = parseFloat(el.style.left) / 100 * displayWidth * scaleX;
+      const y = parseFloat(el.style.top) / 100 * displayHeight * scaleY;
+      const w = parseFloat(el.style.width) / 100 * displayWidth * scaleX;
+      const h = parseFloat(el.style.height) / 100 * displayHeight * scaleY;
+
       const x2 = Math.round(x + w);
       const y2 = Math.round(y + h);
       output += `  <area shape=\"rect\" coords=\"${Math.round(x)},${Math.round(y)},${x2},${y2}\" href=\"${href}\" alt=\"${title}\" title=\"${title}\" />\n`;
