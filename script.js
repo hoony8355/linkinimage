@@ -1,4 +1,4 @@
-// Linkin Image JS – 확대/축소 기능 제거, 코드 생성 정확도 향상
+// Linkin Image JS – HTML map 버전 좌표 정확도 개선 및 초기화 코드 리셋
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -6,7 +6,7 @@ const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 
-let imageWidth = 1080, imageHeight = 6503;
+let imageWidth = 0, imageHeight = 0;
 let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
@@ -183,16 +183,21 @@ function generateCode() {
   let output = "";
 
   if (codeType === "css") {
-    output += `<div style=\"position: relative; max-width: ${imageWidth}px; margin: auto;\">\n`;
-    output += `  <img src=\"${preview.src}\" style=\"width: 100%; display: block;\" alt=\"포스터\" />\n\n`;
+    output += `<div style="position: relative; max-width: ${imageWidth}px; margin: auto;">
+`;
+    output += `  <img src="${preview.src}" style="width: 100%; display: block;" alt="포스터" />
+\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
-      output += `  <a href=\"${href}\" target=\"_blank\" title=\"${title}\" style=\"position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;\"></a>\n`;
+      output += `  <a href="${href}" target="_blank" title="${title}" style="position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;"></a>
+`;
     });
     output += `</div>`;
   } else {
-    output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
+    output += `<img src="${preview.src}" usemap="#image-map" style="width: 100%;">
+<map name="image-map">
+`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
@@ -200,7 +205,8 @@ function generateCode() {
       const y = parseFloat(el.style.top) / 100 * imageHeight;
       const w = parseFloat(el.style.width) / 100 * imageWidth;
       const h = parseFloat(el.style.height) / 100 * imageHeight;
-      output += `  <area shape=\"rect\" coords=\"${Math.round(x)},${Math.round(y)},${Math.round(x+w)},${Math.round(y+h)}\" href=\"${href}\" alt=\"${title}\" title=\"${title}\" />\n`;
+      output += `  <area shape="rect" coords="${Math.round(x)},${Math.round(y)},${Math.round(x+w)},${Math.round(y+h)}" href="${href}" alt="${title}" title="${title}" />
+`;
     });
     output += `</map>`;
   }
