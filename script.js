@@ -1,4 +1,4 @@
-// Linkin Image JS – 확대/축소 기능 제거, 코드 생성 정확도 향상
+// Linkin Image Generator JS – HTML map 버전 개선 및 리팩토링
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -6,7 +6,7 @@ const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 
-let imageWidth = 1080, imageHeight = 6503;
+let imageWidth = 0, imageHeight = 0;
 let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
@@ -212,20 +212,7 @@ function generateCode() {
 
 function testGeneratedCode() {
   const win = window.open();
-  const codeType = document.querySelector('input[name="code-type"]:checked').value;
   const code = document.getElementById("code-output").value;
-
-  if (codeType === "html") {
-    // 원본 이미지 크기로 고정
-    const fixedCode = code.replace(
-      /<img([^>]+)style="[^"]*"/,
-      `<img$1width="${imageWidth}" height="${imageHeight}"`
-    );
-    win.document.write(`<html><body>${fixedCode}</body></html>`);
-  } else {
-    win.document.write(`<html><body>${code}</body></html>`);
-  }
-
+  win.document.write(`<html><body>${code}</body></html>`);
   win.document.close();
 }
-
