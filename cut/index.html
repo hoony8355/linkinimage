@@ -42,7 +42,7 @@
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
-          splitY = [0];
+          splitY = [0, img.height]; // 마지막 조각을 위해 자동으로 이미지 끝 추가
           segments = [];
           preview.innerHTML = '';
         };
@@ -56,7 +56,8 @@
       const y = Math.round((e.clientY - rect.top) * (canvas.height / rect.height));
       if (!splitY.includes(y)) {
         splitY.push(y);
-        splitY.sort((a, b) => a - b);
+        splitY = splitY.filter(v => v >= 0 && v <= img.height);
+        splitY = [...new Set(splitY)].sort((a, b) => a - b);
         renderLines();
         updateSegments();
       }
