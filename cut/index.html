@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이미지 분할 HTML 생성기</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    canvas { display: block; max-width: 100%; margin-bottom: 10px; cursor: crosshair; }
+    .preview { display: flex; flex-direction: column; gap: 16px; }
+    .preview-item { border: 1px solid #ccc; padding: 8px; }
+    textarea { width: 100%; height: 200px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>이미지 분할 HTML 생성기</h1>
+  <input type="file" id="imageInput" accept="image/*" /><br /><br />
+  <canvas id="canvas"></canvas>
+  <p>이미지 위를 클릭하여 "분할선"을 추가하세요 (가로선 기준)</p>
+  <div class="preview" id="preview"></div>
+  <button id="generateBtn">HTML 코드 생성</button>
+  <textarea id="output" placeholder="생성된 HTML 코드가 여기에 표시됩니다"></textarea>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const output = document.getElementById('output');
+    const generateBtn = document.getElementById('generateBtn');
+
+    let img = new Image();
+    let splitY = [0];
+    let segments = [];
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          splitY = [0];
+          segments = [];
+          preview.innerHTML = '';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const y = Math.round((e.clientY - rect.top) * (canvas.height / rect.height));
+      if (!splitY.includes(y)) {
+        splitY.push(y);
+        splitY.sort((a, b) => a - b);
+        renderLines();
+        updateSegments();
+      }
+    });
+
+    function renderLines() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      splitY.forEach((y) => {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      });
+    }
+
+    function updateSegments() {
+      preview.innerHTML = '';
+      segments = [];
+      for (let i = 0; i < splitY.length - 1; i++) {
+        const top = splitY[i];
+        const bottom = splitY[i + 1];
+        const h = bottom - top;
+
+        const segmentCanvas = document.createElement('canvas');
+        segmentCanvas.width = canvas.width;
+        segmentCanvas.height = h;
+        const segmentCtx = segmentCanvas.getContext('2d');
+        segmentCtx.drawImage(img, 0, top, canvas.width, h, 0, 0, canvas.width, h);
+
+        const base64 = segmentCanvas.toDataURL();
+        segments.push({ base64, link: '', alt: '', isLink: false });
+
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `
+          <img src="${base64}" width="100%" /><br />
+          <label>alt: <input type="text" class="alt-input" data-index="${i}" /></label><br />
+          <label><input type="checkbox" class="link-toggle" data-index="${i}" /> 링크 걸기</label><br />
+          <input type="text" class="link-input" data-index="${i}" style="width: 100%; display: none;" placeholder="https://example.com" />
+        `;
+        preview.appendChild(div);
+      }
+    }
+
+    preview.addEventListener('input', (e) => {
+      const index = e.target.dataset.index;
+      if (e.target.classList.contains('alt-input')) {
+        segments[index].alt = e.target.value;
+      } else if (e.target.classList.contains('link-input')) {
+        segments[index].link = e.target.value;
+      }
+    });
+
+    preview.addEventListener('change', (e) => {
+      const index = e.target.dataset.index;
+      if (e.target.classList.contains('link-toggle')) {
+        const checked = e.target.checked;
+        segments[index].isLink = checked;
+        const linkInput = preview.querySelector(`.link-input[data-index='${index}']`);
+        if (linkInput) linkInput.style.display = checked ? 'block' : 'none';
+      }
+    });
+
+    generateBtn.addEventListener('click', () => {
+      const rows = segments.map(seg => {
+        const imgTag = `<img src="${seg.base64}" width="100%" alt="${seg.alt}" style="display: block; border: 0;">`;
+        const content = seg.isLink ? `<a href="${seg.link}" target="_blank" style="display: block;">${imgTag}</a>` : imgTag;
+        return `<tr><td style="padding: 0; line-height: 0;">${content}</td></tr>`;
+      }).join('\n');
+
+      const html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 1080px; margin: 0 auto; border-collapse: collapse;">\n${rows}\n</table>`;
+
+      output.value = html;
+    });
+  </script>
+</body>
+</html>
