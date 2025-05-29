@@ -212,7 +212,20 @@ function generateCode() {
 
 function testGeneratedCode() {
   const win = window.open();
+  const codeType = document.querySelector('input[name="code-type"]:checked').value;
   const code = document.getElementById("code-output").value;
-  win.document.write(`<html><body>${code}</body></html>`);
+
+  if (codeType === "html") {
+    // 원본 이미지 크기로 고정
+    const fixedCode = code.replace(
+      /<img([^>]+)style="[^"]*"/,
+      `<img$1width="${imageWidth}" height="${imageHeight}"`
+    );
+    win.document.write(`<html><body>${fixedCode}</body></html>`);
+  } else {
+    win.document.write(`<html><body>${code}</body></html>`);
+  }
+
   win.document.close();
 }
+
