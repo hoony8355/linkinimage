@@ -1,4 +1,4 @@
-// Linkin Image JS – 이미지 크기 동적 계산 및 HTML map 좌표 정확도 개선 버전
+// Linkin Image Generator JS – HTML map 버전 개선 및 좌표 정확도 향상
 
 const preview = document.getElementById("preview");
 const imageWrapper = document.getElementById("image-wrapper");
@@ -6,7 +6,6 @@ const container = document.getElementById("image-container");
 const testBtn = document.getElementById("test-button");
 const codeOptions = document.getElementById("code-options");
 
-let imageWidth = 0, imageHeight = 0;
 let hotspotIndex = 0;
 let resizingElement = null;
 let currentResizeButton = null;
@@ -22,8 +21,7 @@ if (imageUpload) {
       const reader = new FileReader();
       reader.onload = function (event) {
         preview.onload = () => {
-          imageWidth = preview.naturalWidth;
-          imageHeight = preview.naturalHeight;
+          console.log("Image loaded. Size:", preview.naturalWidth, preview.naturalHeight);
         };
         preview.src = event.target.result;
       };
@@ -37,8 +35,7 @@ function loadImageFromURL() {
   if (url) {
     preview.crossOrigin = "anonymous";
     preview.onload = () => {
-      imageWidth = preview.naturalWidth;
-      imageHeight = preview.naturalHeight;
+      console.log("Image loaded from URL. Size:", preview.naturalWidth, preview.naturalHeight);
     };
     preview.src = url;
   }
@@ -180,38 +177,32 @@ function makeDraggable(el, controls) {
 
 function generateCode() {
   const codeType = document.querySelector('input[name="code-type"]:checked').value;
+  const naturalWidth = preview.naturalWidth;
+  const naturalHeight = preview.naturalHeight;
+
   let output = "";
 
-  if (!imageWidth || !imageHeight) {
-    alert("이미지를 먼저 업로드하거나 URL을 입력해주세요.");
-    return;
-  }
-
   if (codeType === "css") {
-    output += `<div style="position: relative; max-width: ${imageWidth}px; margin: auto;">
-`;
-    output += `  <img src="${preview.src}" style="width: 100%; display: block;" alt="포스터" />
-\n`;
+    output += `<div style=\"position: relative; max-width: ${naturalWidth}px; margin: auto;\">\n`;
+    output += `  <img src=\"${preview.src}\" style=\"width: 100%; display: block;\" alt=\"포스터\" />\n\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
-      output += `  <a href="${href}" target="_blank" title="${title}" style="position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;"></a>
-`;
+      output += `  <a href=\"${href}\" target=\"_blank\" title=\"${title}\" style=\"position: absolute; left: ${el.style.left}; top: ${el.style.top}; width: ${el.style.width}; height: ${el.style.height}; display: block;\"></a>\n`;
     });
     output += `</div>`;
   } else {
-    output += `<img src="${preview.src}" usemap="#image-map" style="width: 100%;">
-<map name="image-map">
-`;
+    output += `<img src=\"${preview.src}\" usemap=\"#image-map\" style=\"width: 100%;\">\n<map name=\"image-map\">\n`;
     document.querySelectorAll(".hotspot").forEach((el) => {
       const href = el.getAttribute("data-href") || "#";
       const title = el.getAttribute("data-title") || "";
-      const x = parseFloat(el.style.left) / 100 * imageWidth;
-      const y = parseFloat(el.style.top) / 100 * imageHeight;
-      const w = parseFloat(el.style.width) / 100 * imageWidth;
-      const h = parseFloat(el.style.height) / 100 * imageHeight;
-      output += `  <area shape="rect" coords="${Math.round(x)},${Math.round(y)},${Math.round(x + w)},${Math.round(y + h)}" href="${href}" alt="${title}" title="${title}" />
-`;
+      const x = parseFloat(el.style.left) / 100 * naturalWidth;
+      const y = parseFloat(el.style.top) / 100 * naturalHeight;
+      const w = parseFloat(el.style.width) / 100 * naturalWidth;
+      const h = parseFloat(el.style.height) / 100 * naturalHeight;
+      const x2 = Math.round(x + w);
+      const y2 = Math.round(y + h);
+      output += `  <area shape=\"rect\" coords=\"${Math.round(x)},${Math.round(y)},${x2},${y2}\" href=\"${href}\" alt=\"${title}\" title=\"${title}\" />\n`;
     });
     output += `</map>`;
   }
