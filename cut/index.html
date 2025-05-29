@@ -10,6 +10,7 @@
     .preview { display: flex; flex-direction: column; gap: 16px; }
     .preview-item { border: 1px solid #ccc; padding: 8px; }
     textarea { width: 100%; height: 200px; margin-top: 20px; }
+    #log { background: #f0f0f0; padding: 10px; font-size: 12px; white-space: pre-wrap; margin-top: 20px; height: 120px; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -18,16 +19,26 @@
   <canvas id="canvas"></canvas>
   <p>이미지 위를 클릭하여 "분할선"을 추가하세요 (가로선 기준)</p>
   <div class="preview" id="preview"></div>
-  <button id="generateBtn">HTML 코드 생성</button>
+  <button id="uploadBtn">Imgur 업로드 & HTML 생성</button>
   <textarea id="output" placeholder="생성된 HTML 코드가 여기에 표시됩니다"></textarea>
+  <div id="log"></div>
 
   <script>
+    const CLIENT_ID = '82e27b7d2fe5c86';
+
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const imageInput = document.getElementById('imageInput');
     const preview = document.getElementById('preview');
     const output = document.getElementById('output');
-    const generateBtn = document.getElementById('generateBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const log = document.getElementById('log');
+
+    function logMessage(msg) {
+      console.log(msg);
+      log.textContent += `\n${msg}`;
+      log.scrollTop = log.scrollHeight;
+    }
 
     let img = new Image();
     let splitY = [0];
@@ -42,9 +53,10 @@
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
-          splitY = [0, img.height]; // 마지막 조각을 위해 자동으로 이미지 끝 추가
+          splitY = [0, img.height];
           segments = [];
           preview.innerHTML = '';
+          logMessage(`이미지 로드 완료: ${img.width}x${img.height}`);
         };
         img.src = event.target.result;
       };
@@ -60,6 +72,7 @@
         splitY = [...new Set(splitY)].sort((a, b) => a - b);
         renderLines();
         updateSegments();
+        logMessage(`분할선 추가: y = ${y}`);
       }
     });
 
@@ -90,19 +103,20 @@
         const segmentCtx = segmentCanvas.getContext('2d');
         segmentCtx.drawImage(img, 0, top, canvas.width, h, 0, 0, canvas.width, h);
 
-        const base64 = segmentCanvas.toDataURL();
-        segments.push({ base64, link: '', alt: '', isLink: false });
+        const base64 = segmentCanvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+        segments.push({ base64, link: '', alt: '', isLink: false, url: '' });
 
         const div = document.createElement('div');
         div.className = 'preview-item';
         div.innerHTML = `
-          <img src="${base64}" width="100%" /><br />
+          <img src="data:image/png;base64,${segments[i].base64}" width="100%" /><br />
           <label>alt: <input type="text" class="alt-input" data-index="${i}" /></label><br />
           <label><input type="checkbox" class="link-toggle" data-index="${i}" /> 링크 걸기</label><br />
           <input type="text" class="link-input" data-index="${i}" style="width: 100%; display: none;" placeholder="https://example.com" />
         `;
         preview.appendChild(div);
       }
+      logMessage(`총 ${segments.length}개 조각 생성됨.`);
     }
 
     preview.addEventListener('input', (e) => {
@@ -124,16 +138,45 @@
       }
     });
 
-    generateBtn.addEventListener('click', () => {
-      const rows = segments.map(seg => {
-        const imgTag = `<img src="${seg.base64}" width="100%" alt="${seg.alt}" style="display: block; border: 0;">`;
-        const content = seg.isLink ? `<a href="${seg.link}" target="_blank" style="display: block;">${imgTag}</a>` : imgTag;
-        return `<tr><td style="padding: 0; line-height: 0;">${content}</td></tr>`;
-      }).join('\n');
+    async function uploadToImgur(base64, index) {
+      logMessage(`(${index + 1}) Imgur 업로드 시작...`);
+      const response = await fetch("https://api.imgur.com/3/image", {
+        method: "POST",
+        headers: {
+          Authorization: `Client-ID ${CLIENT_ID}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ image: base64 })
+      });
+      const data = await response.json();
+      if (data.success) {
+        logMessage(`(${index + 1}) 업로드 완료: ${data.data.link}`);
+        return data.data.link;
+      } else {
+        logMessage(`(${index + 1}) 업로드 실패: ${JSON.stringify(data)}`);
+        throw new Error("Imgur upload failed");
+      }
+    }
 
-      const html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 1080px; margin: 0 auto; border-collapse: collapse;">\n${rows}\n</table>`;
+    uploadBtn.addEventListener('click', async () => {
+      output.value = '이미지를 Imgur에 업로드 중입니다...';
+      try {
+        for (let i = 0; i < segments.length; i++) {
+          segments[i].url = await uploadToImgur(segments[i].base64, i);
+        }
 
-      output.value = html;
+        const rows = segments.map(seg => {
+          const imgTag = `<img src="${seg.url}" width="100%" alt="${seg.alt}" style="display: block; border: 0;">`;
+          const content = seg.isLink ? `<a href="${seg.link}" target="_blank" style="display: block;">${imgTag}</a>` : imgTag;
+          return `<tr><td style="padding: 0; line-height: 0;">${content}</td></tr>`;
+        }).join('\n');
+
+        const html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 1080px; margin: 0 auto; border-collapse: collapse;">\n${rows}\n</table>`;
+        output.value = html;
+        logMessage("✅ HTML 코드 생성 완료");
+      } catch (err) {
+        logMessage("❌ 오류 발생: " + err.message);
+      }
     });
   </script>
 </body>
