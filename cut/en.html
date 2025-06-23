@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Slice Link Generator | HTML Image Map Tool</title>
+  <meta name="description" content="This tool allows you to slice an image and assign different links to each piece. Perfect for newsletters, blogs, and landing pages." />
+  <meta name="keywords" content="image link generator, image map tool, HTML image map, slice image links, newsletter image links, image slicing tool, image map HTML generator" />
+  <meta property="og:title" content="Image Slice Link Generator | HTML Image Map Tool" />
+  <meta property="og:description" content="Slice an image into clickable areas and assign unique links to each. Copy the generated HTML and paste it into your email or webpage." />
+  <meta property="og:image" content="https://hoony8355.github.io/linkinimage/thumbnail.png" />
+  <meta property="og:url" content="https://hoony8355.github.io/linkinimage/cut/en.html" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://hoony8355.github.io/linkinimage/cut/en.html" />
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-85MZ11335Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-85MZ11335Y');
+  </script>
+
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "rrhra2zudb");
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Image Slice Link Generator",
+    "url": "https://hoony8355.github.io/linkinimage/cut/en.html",
+    "description": "A tool for slicing images and assigning individual links to each piece. Useful for newsletters, blogs, and promotional emails. Outputs HTML code for direct use.",
+    "applicationCategory": "Image Editor",
+    "operatingSystem": "All",
+    "screenshot": "https://hoony8355.github.io/linkinimage/thumbnail.png"
+  }
+  </script>
+</head>
+<body>
+  <h1>Image Slice Link Generator</h1>
+  <p>
+    Slice a single image into sections and assign unique links to each slice.
+    Copy the generated HTML code and use it directly in newsletters, emails, blogs, and more.
+  </p>
+
+  <h2>🧭 How to Use</h2>
+  <ol>
+    <li><strong>Upload Image:</strong> Choose the image you want to slice.</li>
+    <li><strong>Add Slice Lines:</strong> Click on the image to add horizontal cut lines. The image will be sliced along these lines.</li>
+    <li><strong>Insert Links & Generate Code:</strong> Enter a URL for each slice, then generate the HTML code.</li>
+    <li><strong>Copy & Paste:</strong> Copy the generated code and paste it wherever you need it.</li>
+  </ol>
+
+  <hr />
+
+  <input type="file" id="imageInput" accept="image/*" /><br /><br />
+  <canvas id="canvas"></canvas>
+  <p>Click on the image to add horizontal slicing lines.</p>
+
+  <div class="preview" id="preview"></div>
+  <button id="uploadBtn">Generate HTML with Links</button>
+  <button id="testBtn" disabled>Preview Test</button>
+
+  <textarea id="output" placeholder="HTML code will be generated here. Copy and use it as needed."></textarea>
+  <div id="log"></div>
+
+  <h2>🔍 Live Preview</h2>
+  <div id="testArea"></div>
+</body>
+</html>
